@@ -86,7 +86,7 @@ try:
     # Kiểm tra file
     file_prefix = f"-{start_date.strftime('%Y%m%d%H%M%S')}-{end_date.strftime('%Y%m%d%H%M%S')}"
     expected_filename = f"{file_prefix}.xml"
-    file_path = os.path.join(DOWNLOAD_DIR, expected_filename)
+    file_path = os.path.join('C:\\GMedAgent\\Pending', expected_filename)
 
     if os.path.exists(file_path):
         file_size = os.path.getsize(file_path) / 1024
