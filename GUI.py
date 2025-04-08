@@ -46,7 +46,8 @@ class AutoReportApp:
         self.load_schedule()
 
     def setup_logging(self):
-        log_file = os.path.join(self.log_dir, f"log_{datetime.now().strftime('%Y%m%d')}.log")
+        self.current_date = datetime.now().strftime('%Y%m%d')
+        log_file = os.path.join(self.log_dir, f"log_{self.current_date}.log")
         logging.basicConfig(
             filename=log_file,
             level=logging.INFO,
@@ -54,6 +55,21 @@ class AutoReportApp:
             datefmt='%d/%m/%Y %H:%M:%S'
         )
         self.log_handler = None
+
+    def check_and_rotate_log(self):
+        new_date = datetime.now().strftime('%Y%m%d')
+        if new_date != self.current_date:
+            logging.getLogger().handlers.clear()
+            self.current_date = new_date
+            log_file = os.path.join(self.log_dir, f"log_{self.current_date}.log")
+            logging.basicConfig(
+                filename=log_file,
+                level=logging.INFO,
+                format='{{%(asctime)s}} - %(message)s',
+                datefmt='%d/%m/%Y %H:%M:%S'
+            )
+            if self.log_handler:
+                logging.getLogger().addHandler(self.log_handler)
 
     def create_widgets(self):
         main_frame = ttk.Frame(self.root, padding="10")
@@ -162,6 +178,7 @@ class AutoReportApp:
 
     def run_countdown(self):
         while not self.stop_countdown.is_set():
+            self.check_and_rotate_log()
             now = datetime.now()
             if now >= self.scheduled_time:
                 self.execute_script()
@@ -204,6 +221,7 @@ class AutoReportApp:
         start_date = yesterday.replace(hour=0, minute=0, second=0)
         end_date = yesterday.replace(hour=23, minute=59, second=59)
         file_prefix = f"-{start_date.strftime('%Y%m%d%H%M%S')}-{end_date.strftime('%Y%m%d%H%M%S')}"
+        self.download_dir = 'C:\\GMedAgent\\Pending'
         expected_path = os.path.join(self.download_dir, f"{file_prefix}.xml")
         
         if os.path.exists(expected_path):
